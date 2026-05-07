@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>天狼星 · 学术助手（帧率策略版）</title>
+  <style>
+    :root { --bg:#080b14; --panel:rgba(20,25,45,.88); --panel2:rgba(255,255,255,.055); --accent:#6aa8ff; --accent2:#f0c060; --danger:#ef5350; --ok:#27ae60; --text:#eaf1ff; --muted:#9ca9bd; --line:rgba(120,160,220,.25); --shadow:0 16px 50px rgba(0,0,0,.32); }
+    *{box-sizing:border-box} body{margin:0;font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,#142448 0,#080b14 42%,#05060b 100%);color:var(--text);min-height:100vh} a{color:inherit} button,input,select,textarea{font:inherit} .stars{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1} .star{position:absolute;border-radius:50%;background:#fff;opacity:.55;animation:twinkle 4s infinite alternate} @keyframes twinkle{from{opacity:.2;transform:scale(.9)}to{opacity:1;transform:scale(1.25)}}
+    .wrap{width:min(1280px,calc(100% - 32px));margin:auto;padding:24px 0 48px} header{position:relative;text-align:center;padding:34px 22px;margin-bottom:22px;border:1px solid var(--line);border-radius:26px;background:linear-gradient(135deg,rgba(27,39,76,.86),rgba(30,28,60,.68));box-shadow:var(--shadow);backdrop-filter:blur(14px)} h1{font-size:clamp(2rem,5vw,3.4rem);margin:0 0 8px;letter-spacing:.08em;background:linear-gradient(90deg,#dcecff,#fff,#9dccff);-webkit-background-clip:text;color:transparent} header p{margin:0;color:var(--muted)} .user-bar{position:absolute;right:18px;top:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end} .badge,.pill{border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:rgba(255,255,255,.08);color:var(--text)} .badge{cursor:pointer} .badge.safe{background:rgba(39,174,96,.22)} .badge.warn{background:rgba(239,83,80,.25)} .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px} @media(max-width:860px){.grid{grid-template-columns:1fr}.user-bar{position:static;margin-top:18px;justify-content:center}}
+    .card{border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:var(--shadow);padding:22px;margin-bottom:20px;backdrop-filter:blur(12px)} h2{margin:0 0 18px;color:#d7e6ff;border-bottom:1px solid var(--line);padding-bottom:12px} .section-title{grid-column:1/-1;color:var(--accent2);font-size:1.14rem;font-weight:800;margin:14px 0 8px} .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center} .search-box input,.grow{flex:1;min-width:220px} input,select,textarea{background:#11182b;color:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;outline:none} input:focus,select:focus,textarea:focus{border-color:var(--accent)} .btn{border:0;border-radius:999px;padding:11px 18px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;transition:.18s;display:inline-flex;gap:6px;align-items:center;justify-content:center} .btn:hover{filter:brightness(1.08);transform:translateY(-1px)} .btn.gold{background:var(--accent2);color:#13192a} .btn.danger{background:var(--danger)} .btn.ok{background:var(--ok)} .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text)} .btn.sm{padding:7px 11px;font-size:.88rem} .engine-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0} .engine-btn{border:1px solid var(--line);border-radius:999px;padding:9px 14px;background:var(--panel2);color:var(--text);cursor:pointer} .engine-btn.active,.engine-btn:hover{background:var(--accent);border-color:var(--accent)} .form-group{margin:0 0 14px} label{display:block;font-weight:700;margin-bottom:6px} .author-row{display:flex;gap:8px;margin-bottom:8px} .author-row input{flex:1} .result-box,.preview{background:var(--panel2);border-left:4px solid var(--accent);border-radius:14px;padding:14px;margin-top:14px;white-space:pre-wrap} .item{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;background:var(--panel2);padding:12px;border-radius:14px;margin:10px 0} .item-text{overflow-wrap:anywhere} .tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px} .tool-card{border:1px solid var(--line);background:var(--panel2);border-radius:16px;padding:14px;min-height:52px} .tool-card a{color:#a9ccff;text-decoration:none;font-weight:800} .tool-card small{display:block;color:var(--muted);margin-top:4px}.tag{display:inline-block;margin:8px 5px 0 0;padding:3px 8px;border:1px solid var(--line);border-radius:999px;color:#cfe1ff;background:rgba(255,255,255,.045);font-size:.76rem}.tool-card mark{background:rgba(240,192,96,.28);color:#fff;border-radius:4px;padding:0 2px} table{width:100%;border-collapse:collapse} th,td{border-bottom:1px solid var(--line);padding:9px;text-align:left;vertical-align:top} th{color:#cfe1ff;background:rgba(255,255,255,.06)} .scroll{max-height:420px;overflow:auto} .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.68);backdrop-filter:blur(8px);z-index:10;padding:16px} .modal.active{display:flex} .modal-box{width:min(560px,100%);border:1px solid var(--line);border-radius:24px;background:#171d31;padding:24px;box-shadow:var(--shadow)} .toast{position:fixed;right:24px;bottom:24px;z-index:20;background:#222a43;color:#fff;border:1px solid var(--line);border-radius:999px;padding:12px 18px;display:none} .toast.show{display:block} .muted{color:var(--muted)}
+
+    .perf-panel{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:18px;padding:12px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.045)}
+    .fps-meter{min-width:92px;text-align:center;border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:rgba(106,168,255,.14);font-weight:800;color:#dbeaff}
+    .perf-note{font-size:.88rem;color:var(--muted)}
+    body[data-fps-mode="unlimited"] .star{animation:none;will-change:transform,opacity}
+    body[data-fps-mode="balanced"] .star{animation:none;will-change:transform,opacity}
+    body[data-fps-mode="powersave"] .star{animation:none}
+    body[data-fps-mode="powersave"] .star:nth-child(n+46){display:none}
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div class="wrap">
+    <header>
+      <h1>✨ 天狼星 · 学术星空</h1>
+      <p>多引擎搜索 · 引用生成 · AI 平台 · 工具箱 · 浏览记录</p>
+      <div class="perf-panel" aria-label="页面帧率设置">
+        <strong>⚙️ 页面帧率</strong>
+        <select id="fpsMode" title="页面动画帧率模式">
+          <option value="unlimited">无上限 / 跟随显示器刷新率</option>
+          <option value="balanced">均衡模式 / 60 FPS 起步</option>
+          <option value="powersave">省电模式 / 20 FPS</option>
+        </select>
+        <span id="fpsMeter" class="fps-meter">FPS --</span>
+        <span class="perf-note">省电模式限制 20 FPS；均衡模式目标 60 FPS；无上限模式不做主动限帧，实际上限由浏览器与显示器决定。</span>
+      </div>
+      <div class="user-bar" id="userBar"></div>
+    </header>
+
+    <section class="card">
+      <h2>🔭 文献搜索 & AI</h2>
+      <div class="row search-box"><input id="searchInput" placeholder="关键词、DOI、网址或标题..." /><button class="btn" id="searchBtn">🚀 搜索</button></div>
+      <div class="engine-row" id="engineRow"></div>
+      <div class="row"><input id="refInfo" class="grow" placeholder="文献标题 / DOI / 作者 / 年份..." /><select id="refFormat"><option>APA 第7版</option><option>MLA 第9版</option><option>Chicago 第17版</option><option>Harvard</option><option>Vancouver</option><option>GB/T 7714</option></select><button class="btn ghost" id="copyPromptBtn">📋 复制提示词</button></div>
+      <div id="refPreview" class="preview muted">输入文献信息后，这里会生成可复制给 AI 的提示词。</div>
+      <div class="row"><select id="aiPlatform"><optgroup label="国内"><option>DeepSeek</option><option>Kimi</option><option>通义千问</option><option>豆包</option><option>文心一言</option><option>讯飞星火</option><option>腾讯混元</option><option>智谱清言</option></optgroup><optgroup label="国外"><option>ChatGPT</option><option>Gemini</option><option>Claude</option><option>Copilot</option><option>Perplexity</option></optgroup></select><button class="btn gold" id="openAiBtn">🤖 复制并打开 AI</button></div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>📄 引用生成器</h2>
+        <div class="row" style="margin-bottom:14px"><button class="btn sm" data-tab="manual">手动填写</button><button class="btn sm ghost" data-tab="auto">快速粘贴</button></div>
+        <div id="manualTab">
+          <div class="form-group"><label>DOI 自动填充</label><div class="row"><input id="linkInput" class="grow" placeholder="粘贴 DOI 或 DOI 链接..." /><button class="btn sm" id="doiBtn">✨ 填充</button></div></div>
+          <div class="form-group"><label>类型</label><select id="type"><option>期刊文章</option><option>图书</option><option>网页</option></select></div>
+          <div id="authorsBox" class="form-group"><label>作者</label><div class="author-row"><input class="author-input" placeholder="姓, 名"><button class="btn sm ghost" id="addAuthorBtn">➕</button></div></div>
+          <div class="form-group"><label>年份</label><input id="year" placeholder="2026"></div>
+          <div class="form-group"><label>标题 *</label><input id="title" placeholder="文章标题"></div>
+          <div class="form-group"><label>期刊 / 来源</label><input id="source" placeholder="Nature"></div>
+          <div class="form-group"><label>DOI / URL</label><input id="doi" placeholder="10.1000/xyz 或 https://..."></div>
+          <button class="btn" id="generateBtn">生成引用</button>
+        </div>
+        <div id="autoTab" style="display:none"><textarea id="autoArea" rows="6" placeholder="每行一条引用..."></textarea><button class="btn" style="margin-top:10px" id="addAutoBtn">➕ 添加</button></div>
+        <div id="resultBox" class="result-box" style="display:none"><h3>📚 引用列表（<span id="count">0</span>）</h3><div id="list"></div><div class="row"><button class="btn gold" id="copyAllBtn">复制全部</button><button class="btn danger" id="clearAllBtn">清空</button></div></div>
+      </section>
+
+      <section class="card">
+        <h2>🕒 我的浏览记录</h2>
+        <div id="historyContainer" class="scroll"><p class="muted">请登录以查看个人浏览记录</p></div>
+        <div id="adminPanel" style="display:none;margin-top:22px"><h2>⚙️ 管理员面板</h2><button class="btn sm ghost" id="loadAdminBtn">刷新数据</button><div class="scroll"><table id="adminTable"><thead><tr><th>用户</th><th>引用数</th><th>浏览数</th><th>操作</th></tr></thead><tbody></tbody></table></div><div id="adminDetail" class="result-box" style="display:none"></div></div>
+      </section>
+    </div>
+
+    <section class="card"><h2>🧰 大学生论文全流程工具箱</h2>
+      <div class="row" style="margin-bottom:14px">
+        <input id="toolSearch" class="grow" placeholder="搜索工具 / 用途 / 标签，例如：查重、问卷、APA、数据分析..." />
+        <select id="toolCategoryFilter"><option value="all">全部分类</option></select>
+        <button class="btn ghost" id="resetToolFilterBtn">重置</button>
+      </div>
+      <p id="toolStats" class="muted" style="margin-top:-4px"></p>
+      <div class="tool-grid" id="toolContainer"></div>
+    </section>
+    <section class="card"><h2>⚡ 加速 / 网络工具</h2><div class="tool-grid" id="acceleratorContainer"></div></section>
+  </div>
+
+  <div class="modal" id="loginModal"><div class="modal-box"><h2 id="loginTitle">登录</h2><div class="form-group"><label>用户名</label><input id="loginUsername" autocomplete="username"></div><div class="form-group"><label>密码</label><input id="loginPassword" type="password" autocomplete="current-password"></div><div class="row"><button class="btn" id="loginActionBtn">登录</button><button class="btn ghost" id="toggleModeBtn">去注册</button><button class="btn danger" id="closeLoginBtn">取消</button></div></div></div>
+  <div class="modal" id="fwModal"><div class="modal-box"><h2>🛡️ 防火墙日志</h2><p id="fwStatus" class="muted"></p><div id="fwLogContent" class="scroll result-box">暂无记录</div><div class="row" style="margin-top:12px"><button class="btn danger" id="clearFwBtn">清空本地显示</button><button class="btn ghost" id="closeFwBtn">关闭</button></div></div></div>
+  <div id="toast" class="toast"></div>
+
+<script>
+const fallbackTools=[{"cat":"选题 / 开题 / 研究设计","items":[{"name":"Connected Papers","url":"https://www.connectedpapers.com","desc":"论文关系图谱，适合找研究方向和核心文献","tags":["选题","文献图谱"]},{"name":"Research Rabbit","url":"https://researchrabbit.ai","desc":"可视化追踪作者、论文和相似研究","tags":["选题","追踪"]},{"name":"Litmaps","url":"https://www.litmaps.com","desc":"构建文献地图，发现相关论文","tags":["文献地图"]},{"name":"Inciteful","url":"https://inciteful.xyz","desc":"用引用网络扩展文献清单","tags":["引用网络"]},{"name":"Open Knowledge Maps","url":"https://openknowledgemaps.org","desc":"根据关键词生成知识地图","tags":["知识地图"]},{"name":"Elicit","url":"https://elicit.org","desc":"AI 辅助研究问题拆解和文献整理","tags":["AI","选题"]},{"name":"Consensus","url":"https://consensus.app","desc":"围绕研究问题检索论文证据","tags":["证据检索"]},{"name":"OSF","url":"https://osf.io","desc":"开放科学项目、预注册与材料管理","tags":["研究设计"]},{"name":"AsPredicted","url":"https://aspredicted.org","desc":"社会科学/心理学预注册工具","tags":["预注册"]},{"name":"Preregistration Templates","url":"https://www.cos.io/initiatives/prereg","desc":"开题和研究方案预注册模板","tags":["模板"]}]},{"cat":"文献检索 / 学术数据库","items":[{"name":"Google Scholar","url":"https://scholar.google.com","desc":"跨学科搜索论文、学位论文、图书和专利","tags":["检索","通用"]},{"name":"PubMed","url":"https://pubmed.ncbi.nlm.nih.gov","desc":"医学、生物与公共卫生文献数据库","tags":["医学"]},{"name":"Semantic Scholar","url":"https://www.semanticscholar.org","desc":"AI 驱动的学术搜索和论文摘要","tags":["AI检索"]},{"name":"arXiv","url":"https://arxiv.org","desc":"物理、数学、计算机等预印本文献","tags":["预印本"]},{"name":"SSRN","url":"https://ssrn.com","desc":"社科、经济、法律等预印本与工作论文","tags":["社科"]},{"name":"ERIC","url":"https://eric.ed.gov","desc":"教育学论文和报告检索","tags":["教育"]},{"name":"DOAJ","url":"https://doaj.org","desc":"开放获取期刊目录","tags":["开放获取"]},{"name":"CORE","url":"https://core.ac.uk","desc":"开放获取论文聚合搜索","tags":["开放获取"]},{"name":"BASE","url":"https://www.base-search.net","desc":"比勒费尔德学术搜索引擎","tags":["检索"]},{"name":"OpenAlex","url":"https://openalex.org","desc":"开放学术数据索引，可查作者/机构/主题","tags":["学术数据"]},{"name":"PubScholar","url":"https://pubscholar.cn","desc":"公益学术平台，适合中文学术检索","tags":["中文"]},{"name":"中国知网","url":"https://kns.cnki.net","desc":"中文期刊、硕博论文、会议论文检索","tags":["中文"]},{"name":"万方数据","url":"https://www.wanfangdata.com.cn","desc":"中文论文、学位论文和标准检索","tags":["中文"]},{"name":"维普资讯","url":"https://www.cqvip.com","desc":"中文期刊和论文检索","tags":["中文"]},{"name":"National Academies Press","url":"https://nap.nationalacademies.org","desc":"免费学术报告和图书资源","tags":["报告"]}]},{"cat":"文献管理 / 引用生成","items":[{"name":"Zotero","url":"https://www.zotero.org","desc":"收集、整理、标注、引用和共享研究资料","tags":["引用","PDF"]},{"name":"ZoteroBib","url":"https://zbib.org","desc":"无需账号快速生成参考文献","tags":["引用生成"]},{"name":"Mendeley","url":"https://www.mendeley.com","desc":"文献管理、PDF 阅读和引用插件","tags":["引用"]},{"name":"EndNote Online","url":"https://endnote.com","desc":"常见高校订阅的文献管理工具","tags":["引用"]},{"name":"JabRef","url":"https://www.jabref.org","desc":"开源 BibTeX / LaTeX 文献管理","tags":["LaTeX"]},{"name":"Paperpile","url":"https://paperpile.com","desc":"浏览器和 Google Docs 友好的文献管理","tags":["Google Docs"]},{"name":"MyBib","url":"https://www.mybib.com","desc":"免费参考文献和网页引用生成器","tags":["引用生成"]},{"name":"BibGuru","url":"https://www.bibguru.com","desc":"APA、MLA、Chicago 等格式生成","tags":["引用生成"]},{"name":"Citation Machine","url":"https://www.citationmachine.net","desc":"多格式引用生成工具","tags":["引用生成"]},{"name":"Purdue OWL APA","url":"https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/index.html","desc":"APA 论文格式和引用规则指南","tags":["APA"]},{"name":"Purdue OWL MLA","url":"https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/index.html","desc":"MLA 写作和引用规则指南","tags":["MLA"]},{"name":"Crossref Metadata Search","url":"https://search.crossref.org","desc":"用标题或 DOI 查元数据","tags":["DOI"]}]},{"cat":"论文阅读 / PDF 标注 / 翻译","items":[{"name":"ReadPaper","url":"https://readpaper.com","desc":"论文搜索、阅读和笔记","tags":["阅读"]},{"name":"Scholarcy","url":"https://www.scholarcy.com","desc":"论文摘要卡片和重点提取","tags":["摘要"]},{"name":"SciSpace Copilot","url":"https://typeset.io","desc":"论文解释、问答和相关文献查找","tags":["AI阅读"]},{"name":"Explainpaper","url":"https://www.explainpaper.com","desc":"高亮论文段落并生成解释","tags":["AI阅读"]},{"name":"Humata","url":"https://www.humata.ai","desc":"PDF 文档问答和总结","tags":["PDF问答"]},{"name":"ChatPDF","url":"https://www.chatpdf.com","desc":"上传 PDF 后提问和总结","tags":["PDF问答"]},{"name":"NotebookLM","url":"https://notebooklm.google.com","desc":"基于资料库总结、问答和生成学习材料","tags":["资料库"]},{"name":"DeepL Translator","url":"https://www.deepl.com/translator","desc":"高质量多语言翻译","tags":["翻译"]},{"name":"沉浸式翻译","url":"https://immersivetranslate.com","desc":"网页双语翻译和文献阅读辅助","tags":["翻译"]},{"name":"PDFgear","url":"https://www.pdfgear.com","desc":"PDF 阅读、编辑、转换和标注","tags":["PDF"]},{"name":"Xodo","url":"https://xodo.com","desc":"在线 PDF 阅读、批注和合并","tags":["PDF"]}]},{"cat":"写作 / 润色 / 语法检查","items":[{"name":"Grammarly","url":"https://www.grammarly.com","desc":"英文语法、拼写和表达建议","tags":["英文"]},{"name":"QuillBot","url":"https://quillbot.com","desc":"改写、语法检查和摘要","tags":["改写"]},{"name":"LanguageTool","url":"https://languagetool.org","desc":"多语言语法与拼写检查","tags":["语法"]},{"name":"Hemingway Editor","url":"https://hemingwayapp.com","desc":"提升英文可读性和句子清晰度","tags":["可读性"]},{"name":"Writefull","url":"https://www.writefull.com","desc":"面向学术英语的写作反馈","tags":["学术英语"]},{"name":"Trinka","url":"https://www.trinka.ai","desc":"学术和技术写作语法检查","tags":["学术英语"]},{"name":"Paperpal","url":"https://paperpal.com","desc":"学术写作润色和投稿辅助","tags":["学术英语"]},{"name":"Wordvice AI","url":"https://wordvice.ai","desc":"英文论文润色、改写和语法检查","tags":["润色"]},{"name":"Scribbr Knowledge Base","url":"https://www.scribbr.com/knowledge-base/","desc":"论文结构、引用、研究方法教程","tags":["写作教程"]},{"name":"Academic Phrasebank","url":"https://www.phrasebank.manchester.ac.uk","desc":"学术英语常用表达库","tags":["句型"]}]},{"cat":"查重 / 原创性 / 学术规范","items":[{"name":"Turnitin","url":"https://www.turnitin.com","desc":"高校常用原创性检测平台","tags":["查重"]},{"name":"iThenticate","url":"https://www.ithenticate.com","desc":"科研投稿常用相似性检测","tags":["查重"]},{"name":"Scribbr Plagiarism Checker","url":"https://www.scribbr.com/plagiarism-checker/","desc":"论文相似性检测服务","tags":["查重"]},{"name":"DupliChecker","url":"https://www.duplichecker.com","desc":"文本相似性和重复检测","tags":["查重"]},{"name":"Quetext","url":"https://www.quetext.com","desc":"文本相似性检测与引用辅助","tags":["查重"]},{"name":"Plagiarism Detector","url":"https://plagiarismdetector.net","desc":"在线文本重复检测","tags":["查重"]},{"name":"Academic Integrity Tutorial","url":"https://integrity.mit.edu","desc":"学术诚信、引用和避免抄袭指南","tags":["规范"]},{"name":"Cite Them Right","url":"https://www.citethemrightonline.com","desc":"引用和学术诚信学习平台","tags":["引用规范"]}]},{"cat":"数据收集 / 问卷 / 访谈","items":[{"name":"Google Forms","url":"https://forms.google.com","desc":"免费问卷和数据收集","tags":["问卷"]},{"name":"Microsoft Forms","url":"https://forms.office.com","desc":"适合学校 Office 账号的问卷工具","tags":["问卷"]},{"name":"问卷星","url":"https://www.wjx.cn","desc":"中文问卷、考试和调研平台","tags":["中文问卷"]},{"name":"Qualtrics","url":"https://www.qualtrics.com","desc":"专业调查和实验数据收集","tags":["调查"]},{"name":"SurveyMonkey","url":"https://www.surveymonkey.com","desc":"在线问卷与调研分析","tags":["问卷"]},{"name":"Typeform","url":"https://www.typeform.com","desc":"交互式问卷和表单","tags":["问卷"]},{"name":"Otter.ai","url":"https://otter.ai","desc":"英文访谈录音转写","tags":["转写"]},{"name":"飞书妙记","url":"https://www.feishu.cn/product/minutes","desc":"中文会议/访谈转写和纪要","tags":["转写"]},{"name":"oTranscribe","url":"https://otranscribe.com","desc":"免费访谈转写辅助工具","tags":["转写"]}]},{"cat":"数据分析 / 统计 / 代码","items":[{"name":"Google Colab","url":"https://colab.research.google.com","desc":"浏览器运行 Python 和机器学习代码","tags":["Python"]},{"name":"Jupyter","url":"https://jupyter.org","desc":"交互式数据分析和报告环境","tags":["Notebook"]},{"name":"R Project","url":"https://www.r-project.org","desc":"统计分析和可视化编程语言","tags":["R"]},{"name":"RStudio Cloud / Posit Cloud","url":"https://posit.cloud","desc":"在线 RStudio 环境","tags":["R"]},{"name":"jamovi","url":"https://www.jamovi.org","desc":"适合本科生的免费统计软件","tags":["统计"]},{"name":"JASP","url":"https://jasp-stats.org","desc":"免费统计分析软件，适合心理/社科","tags":["统计"]},{"name":"PSPP","url":"https://www.gnu.org/software/pspp/","desc":"SPSS 风格的开源统计软件","tags":["统计"]},{"name":"Orange Data Mining","url":"https://orangedatamining.com","desc":"可视化机器学习和数据挖掘","tags":["机器学习"]},{"name":"KNIME","url":"https://www.knime.com","desc":"可视化数据科学工作流","tags":["数据流"]},{"name":"OpenRefine","url":"https://openrefine.org","desc":"清洗杂乱表格数据","tags":["数据清洗"]},{"name":"Kaggle","url":"https://www.kaggle.com","desc":"数据集、Notebook 和竞赛平台","tags":["数据集"]},{"name":"GitHub","url":"https://github.com","desc":"代码托管、复现论文和版本管理","tags":["代码"]}]},{"cat":"图表 / 绘图 / 排版","items":[{"name":"Overleaf","url":"https://www.overleaf.com","desc":"在线 LaTeX 论文写作和协作","tags":["LaTeX"]},{"name":"Typst","url":"https://typst.app","desc":"现代论文排版和协作写作工具","tags":["排版"]},{"name":"Canva","url":"https://www.canva.com","desc":"海报、答辩 PPT 和信息图设计","tags":["设计"]},{"name":"draw.io / diagrams.net","url":"https://www.drawio.com","desc":"流程图、结构图和系统图","tags":["流程图"]},{"name":"Excalidraw","url":"https://excalidraw.com","desc":"手绘风格图示和草图","tags":["图示"]},{"name":"BioRender","url":"https://www.biorender.com","desc":"生命科学论文图和机制图","tags":["生物图"]},{"name":"RAWGraphs","url":"https://www.rawgraphs.io","desc":"从表格快速生成高级图表","tags":["可视化"]},{"name":"Datawrapper","url":"https://www.datawrapper.de","desc":"新闻和论文常用图表制作","tags":["可视化"]},{"name":"Flourish","url":"https://flourish.studio","desc":"交互式图表和故事化数据展示","tags":["可视化"]},{"name":"Plotly Chart Studio","url":"https://chart-studio.plotly.com","desc":"交互式图表制作与分享","tags":["图表"]},{"name":"Tableau Public","url":"https://public.tableau.com","desc":"可视化仪表板和公开作品集","tags":["可视化"]},{"name":"Figma","url":"https://www.figma.com","desc":"图示、海报和界面原型设计","tags":["设计"]}]},{"cat":"笔记 / 大纲 / 协作","items":[{"name":"Notion","url":"https://www.notion.so","desc":"论文计划、文献矩阵和任务管理","tags":["笔记"]},{"name":"Obsidian","url":"https://obsidian.md","desc":"双链笔记，适合知识库和文献卡片","tags":["知识库"]},{"name":"Logseq","url":"https://logseq.com","desc":"大纲式双链笔记和任务管理","tags":["笔记"]},{"name":"Zotero Notes","url":"https://www.zotero.org/support/note_templates","desc":"结合文献管理的笔记模板","tags":["文献笔记"]},{"name":"Google Docs","url":"https://docs.google.com","desc":"多人协作写作和批注","tags":["协作"]},{"name":"Microsoft Word Online","url":"https://www.office.com/launch/word","desc":"在线 Word 写作和导师批注","tags":["协作"]},{"name":"腾讯文档","url":"https://docs.qq.com","desc":"中文在线协作文档和表格","tags":["协作"]},{"name":"飞书文档","url":"https://www.feishu.cn/product/docs","desc":"文档、表格、知识库和项目协作","tags":["协作"]},{"name":"Dropbox Paper","url":"https://paper.dropbox.com","desc":"团队写作和资料整理","tags":["协作"]}]},{"cat":"答辩 / 演示 / 海报","items":[{"name":"Microsoft PowerPoint","url":"https://www.microsoft.com/microsoft-365/powerpoint","desc":"论文答辩和课堂展示常用工具","tags":["PPT"]},{"name":"Google Slides","url":"https://slides.google.com","desc":"在线协作制作答辩幻灯片","tags":["PPT"]},{"name":"Gamma","url":"https://gamma.app","desc":"AI 辅助生成演示文稿和网页式报告","tags":["AI演示"]},{"name":"Beautiful.ai","url":"https://www.beautiful.ai","desc":"自动排版的演示文稿制作工具","tags":["PPT"]},{"name":"Prezi","url":"https://prezi.com","desc":"非线性演示和答辩展示","tags":["演示"]},{"name":"Slidesgo","url":"https://slidesgo.com","desc":"免费 PPT 和 Google Slides 模板","tags":["模板"]},{"name":"Canva Presentations","url":"https://www.canva.com/presentations/","desc":"答辩 PPT、海报和汇报模板","tags":["模板"]},{"name":"PosterMyWall","url":"https://www.postermywall.com","desc":"学术海报和宣传图设计","tags":["海报"]}]}];
+let tools=JSON.parse(JSON.stringify(fallbackTools));
+const accelerators=[{"name":"Cloudflare WARP","url":"https://1.1.1.1","desc":"常用网络连接与安全 DNS 工具","tags":["网络"]},{"name":"Tailscale","url":"https://tailscale.com","desc":"基于 WireGuard 的组网工具","tags":["组网"]},{"name":"ZeroTier","url":"https://www.zerotier.com","desc":"虚拟局域网和远程访问工具","tags":["组网"]},{"name":"WireGuard","url":"https://www.wireguard.com","desc":"现代 VPN 协议和客户端","tags":["VPN"]},{"name":"OpenVPN","url":"https://openvpn.net/community-downloads/","desc":"经典 VPN 客户端和开源方案","tags":["VPN"]},{"name":"Proton VPN","url":"https://protonvpn.com/free-vpn","desc":"提供免费套餐的 VPN 服务","tags":["VPN"]},{"name":"Windscribe","url":"https://windscribe.com","desc":"提供免费流量套餐的 VPN 服务","tags":["VPN"]},{"name":"TunnelBear","url":"https://www.tunnelbear.com","desc":"易用的 VPN 工具","tags":["VPN"]},{"name":"Psiphon","url":"https://psiphon.ca","desc":"网络连接辅助工具","tags":["网络"]},{"name":"Lantern","url":"https://lantern.io","desc":"网络连接辅助工具","tags":["网络"]}];
+const academicSearchSites=[{"name": "Google Scholar", "url": "https://scholar.google.com", "tier": "主推", "score": 95, "type": "综合型", "bestFor": "跨学科初检、顺藤摸瓜找引用、快速确认论文是否存在", "pros": "覆盖广、入口简单、引用追踪方便", "cons": "筛选维度较弱，元数据和排序不够透明", "tip": "先用它找关键词和核心论文，再去专业库核验。", "tags": ["综合", "引用追踪", "免费"]}, {"name": "Semantic Scholar", "url": "https://www.semanticscholar.org", "tier": "主推", "score": 94, "type": "AI 检索", "bestFor": "快速理解论文、看 TLDR/摘要、按相关性拓展文献", "pros": "AI 摘要、相关论文、引用脉络清楚", "cons": "中文和人文社科覆盖不如综合/中文库", "tip": "适合初读和扩展文献，不要只依赖 AI 摘要。", "tags": ["AI", "理工", "免费"]}, {"name": "PubMed", "url": "https://pubmed.ncbi.nlm.nih.gov", "tier": "主推", "score": 96, "type": "医学/生命科学", "bestFor": "医学、护理、药学、公共卫生、生物方向检索", "pros": "权威、结构化检索强、MeSH 主题词好用", "cons": "不覆盖大多数非医学学科，通常不是全文库", "tip": "医学类论文优先用 PubMed + Google Scholar。", "tags": ["医学", "生命科学", "免费"]}, {"name": "OpenAlex", "url": "https://openalex.org", "tier": "主推", "score": 92, "type": "开放学术索引", "bestFor": "查作者、机构、主题、引用网络和批量数据", "pros": "开放数据、API 友好、适合科研计量", "cons": "网页搜索体验不如 Google Scholar 直观", "tip": "适合做文献计量、趋势分析和作者机构核验。", "tags": ["开放数据", "API", "计量"]}, {"name": "DOAJ", "url": "https://doaj.org", "tier": "主推", "score": 90, "type": "开放获取期刊目录", "bestFor": "找正规开放获取期刊和 OA 文章", "pros": "强调开放获取和期刊质量筛选", "cons": "不是全学科全论文搜索，偏期刊目录", "tip": "投稿前可用它核对期刊是否为正规 OA。", "tags": ["OA", "期刊", "免费"]}, {"name": "CORE", "url": "https://core.ac.uk", "tier": "主推", "score": 88, "type": "开放获取聚合", "bestFor": "找可免费下载的论文全文和机构库版本", "pros": "聚合 OA 仓储，全文可得性强", "cons": "元数据质量可能参差，需核验出版版本", "tip": "找不到全文时，用 CORE 找作者稿/机构库版本。", "tags": ["全文", "OA", "免费"]}, {"name": "BASE", "url": "https://www.base-search.net", "tier": "主推", "score": 87, "type": "学术搜索引擎", "bestFor": "开放仓储、学位论文、报告和灰色文献", "pros": "来源多，适合补充 Google Scholar", "cons": "界面和排序体验一般，需要筛选", "tip": "适合找开放资料和被大型库漏掉的资源。", "tags": ["灰色文献", "OA", "免费"]}, {"name": "The Lens", "url": "https://www.lens.org", "tier": "主推", "score": 86, "type": "论文 + 专利", "bestFor": "工程、药学、技术转化方向连接论文和专利", "pros": "可把学术论文与专利数据连接分析", "cons": "界面学习成本略高", "tip": "做技术路线、专利背景、产业应用时很有用。", "tags": ["专利", "工程", "分析"]}, {"name": "Dimensions Free", "url": "https://app.dimensions.ai/discover/publication", "tier": "主推", "score": 85, "type": "关联研究数据库", "bestFor": "结合论文、基金、专利、临床试验看研究背景", "pros": "关联数据丰富，筛选维度多", "cons": "部分高级功能需要账号或订阅", "tip": "适合论文综述里写研究趋势和资助背景。", "tags": ["基金", "专利", "趋势"]}, {"name": "Crossref Metadata Search", "url": "https://search.crossref.org", "tier": "主推", "score": 84, "type": "DOI/元数据", "bestFor": "用标题找 DOI、核对作者年份和期刊信息", "pros": "DOI 元数据可靠，适合修参考文献", "cons": "不适合做主题式大范围综述检索", "tip": "引用列表格式混乱时先用 Crossref 核 DOI。", "tags": ["DOI", "引用", "元数据"]}, {"name": "arXiv", "url": "https://arxiv.org", "tier": "主推", "score": 88, "type": "预印本", "bestFor": "计算机、物理、数学、统计等前沿论文", "pros": "更新快、免费、前沿领域覆盖强", "cons": "预印本未必经过同行评审", "tip": "引用前确认是否已有正式发表版本。", "tags": ["预印本", "理工", "免费"]}, {"name": "SSRN", "url": "https://ssrn.com", "tier": "主推", "score": 82, "type": "社科预印本", "bestFor": "经济、管理、法律、金融、社科工作论文", "pros": "社科工作论文多，更新快", "cons": "质量需要自行判断，正式版本需核验", "tip": "适合找最新 working paper，不适合当唯一依据。", "tags": ["社科", "预印本"]}, {"name": "ERIC", "url": "https://eric.ed.gov", "tier": "主推", "score": 84, "type": "教育学", "bestFor": "教育学、课程、教学法、教育政策文献", "pros": "教育学垂直领域强，报告和论文丰富", "cons": "非教育学适用性有限", "tip": "教育类论文建议和 Google Scholar 搭配。", "tags": ["教育", "报告", "免费"]}, {"name": "PubScholar", "url": "https://pubscholar.cn", "tier": "主推", "score": 83, "type": "中文公益学术", "bestFor": "中文用户做中英文公益学术检索补充", "pros": "中文界面友好，适合国内学生入门", "cons": "仍需到期刊/数据库核验详情", "tip": "适合作为中文检索入口之一。", "tags": ["中文", "公益"]}, {"name": "中国知网 CNKI", "url": "https://kns.cnki.net", "tier": "主推", "score": 89, "type": "中文数据库", "bestFor": "中文期刊、硕博论文、会议论文和中文综述", "pros": "中文资源覆盖强，高校常用", "cons": "很多内容依赖机构订阅，开放性弱", "tip": "写中文论文/课程论文时不可忽略。", "tags": ["中文", "订阅", "学位论文"]}, {"name": "万方数据", "url": "https://www.wanfangdata.com.cn", "tier": "主推", "score": 82, "type": "中文数据库", "bestFor": "中文期刊、学位论文、会议、标准补充检索", "pros": "中文资源丰富，可补 CNKI 覆盖差异", "cons": "多依赖机构订阅", "tip": "中文文献综述建议 CNKI + 万方交叉查。", "tags": ["中文", "订阅"]}, {"name": "维普资讯", "url": "https://www.cqvip.com", "tier": "主推", "score": 78, "type": "中文数据库", "bestFor": "中文期刊补充检索", "pros": "可补充中文期刊覆盖", "cons": "检索体验和资源开放性有限", "tip": "用于查漏补缺，不建议单独作为唯一中文来源。", "tags": ["中文", "期刊"]}, {"name": "Europe PMC", "url": "https://europepmc.org", "tier": "辅助", "score": 80, "type": "生命科学全文/补充", "bestFor": "生物医学全文、预印本和项目资助关联", "pros": "生物医学开放资源丰富", "cons": "跨学科适用性有限", "tip": "和 PubMed 配合使用。", "tags": ["医学", "全文", "OA"]}, {"name": "百度学术", "url": "https://xueshu.baidu.com", "tier": "辅助", "score": 72, "type": "中文学术入口", "bestFor": "中文用户快速查题名、作者、来源线索", "pros": "中文友好，入口简单", "cons": "质量筛选和来源核验需要额外谨慎", "tip": "适合作为线索入口，不要直接替代数据库。", "tags": ["中文", "入口"]}, {"name": "ResearchGate", "url": "https://www.researchgate.net", "tier": "辅助", "score": 70, "type": "学术社交/作者主页", "bestFor": "找作者上传全文、联系作者、看项目动态", "pros": "有时能找到作者稿或直接联系作者", "cons": "不是严格的文献数据库，元数据和版本需核验", "tip": "作为全文补充入口可以，引用信息请回到期刊/DOI核验。", "tags": ["作者主页", "全文线索"]}, {"name": "Academia.edu", "url": "https://www.academia.edu", "tier": "谨慎", "score": 55, "type": "学术社交/上传平台", "bestFor": "偶尔找作者上传材料或讲义", "pros": "可能有全文线索", "cons": "商业化强，质量和版本不稳定", "tip": "不作为核心学术搜索入口，引用前必须核验。", "tags": ["谨慎", "全文线索"]}, {"name": "普通搜索引擎", "url": "https://www.google.com", "tier": "谨慎", "score": 50, "type": "通用网页搜索", "bestFor": "找机构页面、PDF、课程资料、政策文件", "pros": "范围极广", "cons": "学术筛选弱，广告/SEO/非学术内容多", "tip": "用 filetype:pdf、site:edu、site:gov 等语法辅助。", "tags": ["谨慎", "网页"]}];
+const academicSearchWarnings=[{"name": "盗版论文镜像 / 非授权全文站", "problem": "版权和安全风险高，链接经常失效，学校/论文场景不建议收录。", "fix": "改用 CORE、Unpaywall、PubMed Central、机构仓储或向作者索取全文。"}, {"name": "代写/代降重/包过类网站", "problem": "违反学术诚信，可能造成处分或论文无效。", "fix": "改成写作规范、引用规范、语法润色和查重自检工具。"}, {"name": "只给 AI 答案、不展示来源的网站", "problem": "容易产生幻觉引用，无法复核来源。", "fix": "只作为头脑风暴，正式参考必须回到 DOI、期刊页或数据库。"}, {"name": "不明期刊目录/收录承诺站", "problem": "可能引导到掠夺性期刊或虚假索引。", "fix": "用 DOAJ、期刊官网、学校图书馆数据库和导师意见交叉验证。"}, {"name": "普通网盘/PDF 搬运站", "problem": "版本不明、版权不清、可能含恶意下载。", "fix": "优先使用出版社页、作者主页、机构库和开放获取仓储。"}];
+
+const $ = (id) => document.getElementById(id);
+const state = { citations: [], currentUser: null, isLogin: true, engine: 'https://scholar.google.com/scholar?q=', firewallLogs: [] };
+const STORAGE_KEY = 'siriusUsers.v2';
+const FPS_STORAGE_KEY = 'siriusFpsMode.v1';
+const LEGACY_KEY = 'u';
+const API_BASE = localStorage.getItem('SIRIUS_API_BASE') || 'http://localhost:3000';
+
+const engines = [
+  ['谷歌学术','https://scholar.google.com/scholar?q='], ['百度学术','https://xueshu.baidu.com/s?wd='], ['ResearchGate','https://www.researchgate.net/search/publication?q='], ['知网','https://kns.cnki.net/kns8s/search?classid=&kw='], ['PubMed','https://pubmed.ncbi.nlm.nih.gov/?term='], ['Semantic Scholar','https://www.semanticscholar.org/search?q=']
+];
+const aiUrls = { deepseek:'https://chat.deepseek.com/', kimi:'https://kimi.moonshot.cn/', '通义千问':'https://tongyi.aliyun.com/', '豆包':'https://www.doubao.com/chat/', '文心一言':'https://yiyan.baidu.com/', '讯飞星火':'https://xinghuo.xfyun.cn/', '腾讯混元':'https://hunyuan.tencent.com/', '智谱清言':'https://chatglm.cn/', chatgpt:'https://chat.openai.com/', gemini:'https://gemini.google.com/', claude:'https://claude.ai/', copilot:'https://copilot.microsoft.com/', perplexity:'https://www.perplexity.ai/' };
+
+function text(value) { return document.createTextNode(String(value ?? '')); }
+function toast(message) { const t=$('toast'); t.textContent=message; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),2200); }
+async function copyText(value) { try { await navigator.clipboard.writeText(value); } catch { const ta=document.createElement('textarea'); ta.value=value; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } }
+function users() {
+  const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
+  if (!saved) return [{id:'admin', pw:'admin123', ci:'[]', hi:'[]'}];
+  try { return JSON.parse(saved); } catch { return [{id:'admin', pw:'admin123', ci:'[]', hi:'[]'}]; }
+}
+function saveUsers(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+function saveMe() { if (!state.currentUser) return; const list=users(); const i=list.findIndex(u=>u.id===state.currentUser.id); if (i>=0) { list[i]={...list[i], ci:JSON.stringify(state.citations), hi:JSON.stringify(state.currentUser.hi||[])}; saveUsers(list); } }
+function parseJsonList(value) { try { return JSON.parse(value || '[]'); } catch { return []; } }
+function input(id) { return $(id).value.trim(); }
+
+const FPS_MODE_CONFIG = {
+  unlimited: { label: '无上限', targetFps: 0, starCount: 110 },
+  balanced: { label: '均衡模式', targetFps: 60, starCount: 90 },
+  powersave: { label: '省电模式', targetFps: 20, starCount: 45 }
+};
+let starData = [];
+function getFpsMode() { return document.body.dataset.fpsMode || 'unlimited'; }
+function getTargetFps(mode = getFpsMode()) { return FPS_MODE_CONFIG[mode]?.targetFps ?? 0; }
+function getFrameInterval(mode = getFpsMode()) {
+  const fps = getTargetFps(mode);
+  return fps > 0 ? 1000 / fps : 0;
+}
+function applyFpsMode(mode) {
+  const safeMode = FPS_MODE_CONFIG[mode] ? mode : 'unlimited';
+  document.body.dataset.fpsMode = safeMode;
+  localStorage.setItem(FPS_STORAGE_KEY, safeMode);
+  const select = $('fpsMode');
+  if (select) select.value = safeMode;
+  updateStarVisibility();
+  const msg = safeMode === 'powersave' ? '省电模式已限制为 20 FPS' : safeMode === 'balanced' ? '均衡模式已设为 60 FPS 起步' : '页面帧率已设为无上限';
+  toast(msg);
+}
+function initFpsControl() {
+  const saved = localStorage.getItem(FPS_STORAGE_KEY) || 'unlimited';
+  document.body.dataset.fpsMode = FPS_MODE_CONFIG[saved] ? saved : 'unlimited';
+  if ($('fpsMode')) $('fpsMode').value = document.body.dataset.fpsMode;
+  updateStarVisibility();
+  startFrameMeter();
+  startStarAnimator();
+}
+function startFrameMeter() {
+  let frames = 0;
+  let last = performance.now();
+  let rendered = 0;
+  window.__siriusFrameTick = () => { rendered += 1; };
+  function loop(now) {
+    frames += 1;
+    if (now - last >= 500) {
+      const browserFps = Math.round(frames * 1000 / (now - last));
+      const visualFps = Math.round(rendered * 1000 / (now - last));
+      const mode = getFpsMode();
+      const target = getTargetFps(mode);
+      const suffix = target ? ` / 目标 ${target}` : ' / 无上限';
+      if ($('fpsMeter')) $('fpsMeter').textContent = `FPS ${visualFps || browserFps}${suffix}`;
+      frames = 0;
+      rendered = 0;
+      last = now;
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+function initStars() {
+  const frag=document.createDocumentFragment();
+  starData = [];
+  for (let i=0;i<110;i++) {
+    const s=document.createElement('span');
+    s.className='star';
+    const size=Math.random()*3+1;
+    const x=Math.random()*100, y=Math.random()*100;
+    s.style.cssText=`left:${x}%;top:${y}%;width:${size}px;height:${size}px;opacity:.5`;
+    starData.push({el:s, phase:Math.random()*Math.PI*2, speed:0.0015+Math.random()*0.0025, drift:(Math.random()-.5)*0.18});
+    frag.appendChild(s);
+  }
+  $('stars').appendChild(frag);
+}
+function updateStarVisibility() {
+  const max = FPS_MODE_CONFIG[getFpsMode()]?.starCount ?? 110;
+  starData.forEach((star, index) => { star.el.style.display = index < max ? '' : 'none'; });
+}
+function startStarAnimator() {
+  let lastPaint = 0;
+  function loop(now) {
+    const interval = getFrameInterval();
+    if (!interval || now - lastPaint >= interval) {
+      lastPaint = now;
+      const mode = getFpsMode();
+      const max = FPS_MODE_CONFIG[mode]?.starCount ?? 110;
+      for (let i=0; i<max; i++) {
+        const star = starData[i];
+        const wave = Math.sin(star.phase + now * star.speed);
+        const opacity = 0.45 + wave * 0.38;
+        const scale = 1 + wave * 0.18;
+        const drift = Math.sin(now * star.speed * .55 + star.phase) * star.drift;
+        star.el.style.opacity = String(Math.max(0.18, Math.min(1, opacity)));
+        star.el.style.transform = `translate3d(${drift}px,0,0) scale(${scale})`;
+      }
+      window.__siriusFrameTick?.();
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+function renderEngines() { const row=$('engineRow'); row.replaceChildren(); engines.forEach(([name,url],i)=>{ const b=document.createElement('button'); b.className='engine-btn'+(i===0?' active':''); b.textContent=name; b.addEventListener('click',()=>{ document.querySelectorAll('.engine-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.engine=url; }); row.appendChild(b); }); }
+function updateUI() { const bar=$('userBar'); bar.replaceChildren(); if (state.currentUser) { const pill=document.createElement('span'); pill.className='pill'; pill.textContent='👤 '+state.currentUser.id; const out=document.createElement('button'); out.className='btn sm ghost'; out.textContent='注销'; out.onclick=logout; bar.append(pill,out); $('adminPanel').style.display=state.currentUser.id==='admin'?'block':'none'; } else { const pill=document.createElement('span'); pill.className='pill'; pill.textContent='🌌 未登录'; const login=document.createElement('button'); login.className='btn sm'; login.textContent='登录'; login.onclick=openLogin; bar.append(pill,login); $('adminPanel').style.display='none'; } const badge=document.createElement('span'); badge.className='badge '+(state.firewallLogs.length?'warn':'safe'); badge.textContent=state.firewallLogs.length?`🛡️ 拦截 ${state.firewallLogs.length}`:'🛡️ 防火墙'; badge.onclick=()=>{ $('fwModal').classList.add('active'); renderFW(); }; bar.appendChild(badge); }
+function openLogin() { state.isLogin=true; updateLoginUI(); $('loginModal').classList.add('active'); }
+function closeLogin() { $('loginModal').classList.remove('active'); }
+function updateLoginUI() { $('loginTitle').textContent=state.isLogin?'登录':'注册'; $('loginActionBtn').textContent=state.isLogin?'登录':'注册'; $('toggleModeBtn').textContent=state.isLogin?'去注册':'去登录'; }
+function handleLogin() { const id=input('loginUsername'), pw=input('loginPassword'); if(!id||!pw) return toast('请输入用户名和密码'); const list=users(); if (state.isLogin) { const user=list.find(u=>u.id===id && u.pw===pw); if(!user) return toast('用户名或密码错误'); state.currentUser=user; state.currentUser.hi=parseJsonList(user.hi); state.citations=parseJsonList(user.ci); toast('欢迎 '+id); } else { if(list.some(u=>u.id===id)) return toast('用户名已存在'); state.currentUser={id,pw,ci:'[]',hi:'[]'}; state.currentUser.hi=[]; list.push(state.currentUser); saveUsers(list); state.citations=[]; toast('注册成功'); } closeLogin(); updateUI(); loadData(); }
+function logout() { state.currentUser=null; state.citations=[]; updateUI(); renderCitations(); renderHistory(); }
+function addHistory(q, eng) { if (!state.currentUser) return; state.currentUser.hi = state.currentUser.hi || []; state.currentUser.hi.push({q, eng, t:new Date().toLocaleString('zh-CN', {hour12:false})}); saveMe(); renderHistory(); }
+function renderHistory() { const c=$('historyContainer'); c.replaceChildren(); if(!state.currentUser) return c.append(Object.assign(document.createElement('p'),{className:'muted',textContent:'请登录以查看个人浏览记录'})); const h=state.currentUser.hi||[]; if(!h.length) return c.append(Object.assign(document.createElement('p'),{className:'muted',textContent:'暂无记录'})); const table=document.createElement('table'); table.innerHTML='<thead><tr><th>时间</th><th>关键词</th><th>引擎</th></tr></thead>'; const tbody=document.createElement('tbody'); [...h].reverse().forEach(x=>{ const tr=document.createElement('tr'); [x.t,x.q,x.eng].forEach(v=>{const td=document.createElement('td'); td.append(text(v)); tr.appendChild(td);}); tbody.appendChild(tr); }); table.appendChild(tbody); c.appendChild(table); }
+function doSearch() { const q=input('searchInput'); if(!q) return toast('请输入搜索内容'); const active=document.querySelector('.engine-btn.active')?.textContent || '搜索'; addHistory(q,active); if(/^https?:\/\//i.test(q)) return window.open(q,'_blank','noopener'); const doi=q.match(/10\.\d{4,}\/[-._;()/:A-Za-z0-9]+/i); window.open(doi?'https://doi.org/'+doi[0]:state.engine+encodeURIComponent(q),'_blank','noopener'); }
+function updateRefPreview() { const info=input('refInfo'); $('refPreview').textContent = info ? `请为以下文献生成 ${$('refFormat').value} 格式的引用：
+${info}` : '输入文献信息后，这里会生成可复制给 AI 的提示词。'; }
+async function copyRefPrompt() { const p=$('refPreview').textContent; if(!input('refInfo')) return toast('先输入文献信息'); await copyText(p); toast('✅ 已复制'); }
+async function copyAndOpenAI() { if(!input('refInfo')) return toast('先输入文献信息'); await copyRefPrompt(); const key=$('aiPlatform').value.toLowerCase(); window.open(aiUrls[key] || aiUrls[$('aiPlatform').value] || aiUrls.deepseek, '_blank', 'noopener'); }
+async function autoFillDOI() { const doi=(input('linkInput').match(/10\.\d{4,}\/[-._;()/:A-Za-z0-9]+/i)||[])[0]; if(!doi) return toast('没有识别到 DOI'); try { const r=await fetch(`https://api.crossref.org/works/${encodeURIComponent(doi)}`); if(!r.ok) throw new Error('Crossref 请求失败'); const m=(await r.json()).message || {}; $('title').value=m.title?.[0]||$('title').value; $('source').value=m['container-title']?.[0]||$('source').value; $('year').value=m.issued?.['date-parts']?.[0]?.[0]||$('year').value; $('doi').value=doi; toast('填充完成'); } catch(e) { toast('填充失败，可手动填写'); } }
+function formatAuthors(list) { return list.length ? (list.length===1 ? list[0] : list.length===2 ? `${list[0]} & ${list[1]}` : `${list.slice(0,-1).join(', ')}, & ${list.at(-1)}`) : 'Unknown'; }
+function normalizeDoi(value) { if(!value) return ''; if(/^https?:\/\//i.test(value)) return value; return 'https://doi.org/'+value.replace(/^doi:\s*/i,''); }
+function generateAPA() { if(!state.currentUser) return toast('请先登录'); const title=input('title'); if(!title) return toast('标题必填'); const authors=formatAuthors([...document.querySelectorAll('.author-input')].map(i=>i.value.trim()).filter(Boolean)); const source=input('source') || 'Source'; const year=input('year') || 'n.d.'; const doi=normalizeDoi(input('doi')); const item=`${authors} (${year}). ${title}. ${source}.${doi ? ' '+doi : ''}`; state.citations.push(item); saveMe(); renderCitations(); toast('已添加引用'); }
+function addAuto() { if(!state.currentUser) return toast('请先登录'); const lines=$('autoArea').value.split('\n').map(x=>x.trim()).filter(Boolean); if(!lines.length) return toast('没有可添加内容'); state.citations.push(...lines); saveMe(); renderCitations(); toast(`添加 ${lines.length} 条`); }
+function renderCitations() { $('count').textContent=state.citations.length; $('resultBox').style.display=state.citations.length?'block':'none'; const list=$('list'); list.replaceChildren(); state.citations.forEach((c,i)=>{ const item=document.createElement('div'); item.className='item'; const span=document.createElement('span'); span.className='item-text'; span.append(text(c)); const actions=document.createElement('div'); const cp=document.createElement('button'); cp.className='btn sm ok'; cp.textContent='复制'; cp.onclick=async()=>{await copyText(c);toast('已复制')}; const del=document.createElement('button'); del.className='btn sm danger'; del.textContent='删除'; del.onclick=()=>{state.citations.splice(i,1);saveMe();renderCitations();}; actions.append(cp,del); item.append(span,actions); list.appendChild(item); }); }
+async function copyAll() { if(!state.citations.length) return; await copyText(state.citations.join('\n\n')); toast('已复制全部'); }
+function clearAll() { if(confirm('确定清空所有引用？')) { state.citations=[]; saveMe(); renderCitations(); } }
+function switchTab(tab) { $('manualTab').style.display=tab==='manual'?'block':'none'; $('autoTab').style.display=tab==='auto'?'block':'none'; }
+function addAuthor() { const row=document.createElement('div'); row.className='author-row'; const inp=document.createElement('input'); inp.className='author-input'; inp.placeholder='姓, 名'; const btn=document.createElement('button'); btn.className='btn sm ghost'; btn.textContent='➖'; btn.onclick=()=>row.remove(); row.append(inp,btn); $('authorsBox').appendChild(row); }
+function loadAdmin() { const tbody=$('adminTable').querySelector('tbody'); tbody.replaceChildren(); users().forEach(u=>{ const tr=document.createElement('tr'); [u.id, parseJsonList(u.ci).length, parseJsonList(u.hi).length].forEach(v=>{ const td=document.createElement('td'); td.append(text(v)); tr.appendChild(td); }); const td=document.createElement('td'); const b=document.createElement('button'); b.className='btn sm ghost'; b.textContent='查看'; b.onclick=()=>viewUser(u.id); td.appendChild(b); tr.appendChild(td); tbody.appendChild(tr); }); }
+function viewUser(id) { const u=users().find(x=>x.id===id); if(!u) return; const box=$('adminDetail'); box.style.display='block'; box.replaceChildren(); const h=document.createElement('h3'); h.textContent='用户：'+u.id; box.appendChild(h); parseJsonList(u.ci).forEach(c=>{ const d=document.createElement('div'); d.className='item-text item'; d.append(text(c)); box.appendChild(d); }); const table=document.createElement('table'); table.innerHTML='<thead><tr><th>时间</th><th>关键词</th><th>引擎</th></tr></thead>'; const tbody=document.createElement('tbody'); parseJsonList(u.hi).reverse().forEach(x=>{ const tr=document.createElement('tr'); [x.t,x.q,x.eng].forEach(v=>{const td=document.createElement('td');td.append(text(v));tr.appendChild(td);}); tbody.appendChild(tr); }); table.appendChild(tbody); box.appendChild(table); }
+async function fetchFW() { try { const r=await fetch(`${API_BASE}/api/firewall/logs`, {cache:'no-store'}); if(!r.ok) return; const d=await r.json(); state.firewallLogs=d.logs||[]; state.lastScan=d.lastScan; state.scanning=d.scanning; updateUI(); } catch { /* 后端未启动时静默 */ } }
+function renderFW() { const c=$('fwLogContent'); c.replaceChildren(); $('fwStatus').textContent = state.lastScan ? `上次扫描：${state.lastScan.time}，正常 ${state.lastScan.ok}，异常 ${state.lastScan.blocked}，耗时 ${state.lastScan.durationMs}ms` : '后端未连接或尚未完成扫描'; if(!state.firewallLogs.length) return c.textContent='暂无记录'; state.firewallLogs.forEach(l=>{ const d=document.createElement('div'); d.className='item-text item'; d.append(text(`[${l.time}] ${l.url} - ${l.reason}`)); c.appendChild(d); }); }
+
+function normalizeForSearch(value){return String(value||'').toLowerCase();}
+function getVisibleTools(){
+  const keyword=normalizeForSearch($('toolSearch')?.value).trim();
+  const category=$('toolCategoryFilter')?.value || 'all';
+  return tools.map(cat=>{
+    const items=cat.items.filter(t=>{
+      const inCategory=category==='all'||cat.cat===category;
+      const hay=normalizeForSearch([t.name,t.desc,(t.tags||[]).join(' '),cat.cat].join(' '));
+      return inCategory && (!keyword || hay.includes(keyword));
+    });
+    return {...cat,items};
+  }).filter(cat=>cat.items.length);
+}
+function renderToolControls(){
+  const sel=$('toolCategoryFilter');
+  if(!sel) return;
+  const current=sel.value || 'all';
+  sel.replaceChildren();
+  const all=document.createElement('option'); all.value='all'; all.textContent='全部分类'; sel.appendChild(all);
+  tools.forEach(cat=>{const opt=document.createElement('option'); opt.value=cat.cat; opt.textContent=cat.cat; sel.appendChild(opt);});
+  sel.value=[...sel.options].some(o=>o.value===current)?current:'all';
+}
+function highlightText(value){
+  const keyword=normalizeForSearch($('toolSearch')?.value).trim();
+  const frag=document.createDocumentFragment();
+  const raw=String(value||'');
+  if(!keyword){frag.append(text(raw));return frag;}
+  const lower=raw.toLowerCase(); let start=0, idx;
+  while((idx=lower.indexOf(keyword,start))!==-1){
+    if(idx>start) frag.append(text(raw.slice(start,idx)));
+    const mark=document.createElement('mark'); mark.textContent=raw.slice(idx,idx+keyword.length); frag.append(mark);
+    start=idx+keyword.length;
+  }
+  if(start<raw.length) frag.append(text(raw.slice(start)));
+  return frag;
+}
+async function fetchToolCatalog(){
+  try{
+    const r=await fetch(`${API_BASE}/api/tools`,{cache:'no-store'});
+    if(!r.ok) throw new Error('tools api not ready');
+    const data=await r.json();
+    if(Array.isArray(data.categories)&&data.categories.length){tools=data.categories;renderToolControls();renderTools();toast('已从后端加载工具库');}
+  }catch{renderToolControls();renderTools();}
+}
+
+function renderAcademicSearchSites() {
+  const container = $('academicSearchContainer');
+  if (!container) return;
+  const summary = $('academicSearchSummary');
+  const q = ($('academicSearchInput')?.value || '').trim().toLowerCase();
+  const tier = $('academicTierFilter')?.value || 'all';
+  const filtered = academicSearchSites.filter(site => {
+    const hay = [site.name, site.type, site.bestFor, site.pros, site.cons, site.tip, ...(site.tags || [])].join(' ').toLowerCase();
+    return (tier === 'all' || site.tier === tier) && (!q || hay.includes(q));
+  }).sort((a,b)=>b.score-a.score);
+  const counts = academicSearchSites.reduce((acc, item)=>{acc[item.tier]=(acc[item.tier]||0)+1;return acc;},{});
+  if (summary) summary.textContent = `共整理 ${academicSearchSites.length} 个主流学术搜索入口：主推 ${counts['主推']||0} 个、辅助 ${counts['辅助']||0} 个、谨慎 ${counts['谨慎']||0} 个。当前显示 ${filtered.length} 个。`;
+  container.replaceChildren();
+  filtered.forEach(site => {
+    const card = document.createElement('div'); card.className = 'tool-card';
+    const a = document.createElement('a'); a.href = site.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = `${site.name} · ${site.score}`;
+    const meta = document.createElement('small'); meta.textContent = `${site.tier}｜${site.type}`;
+    const best = document.createElement('small'); best.textContent = `适合：${site.bestFor}`;
+    const pros = document.createElement('small'); pros.textContent = `优点：${site.pros}`;
+    const cons = document.createElement('small'); cons.textContent = `注意：${site.cons}`;
+    const tip = document.createElement('small'); tip.textContent = `建议：${site.tip}`;
+    card.append(a, meta, best, pros, cons, tip);
+    container.appendChild(card);
+  });
+  const warn = $('academicWarnContainer');
+  if (warn) {
+    warn.replaceChildren();
+    academicSearchWarnings.forEach(item => {
+      const card = document.createElement('div'); card.className = 'tool-card';
+      const title = document.createElement('b'); title.textContent = item.name;
+      const problem = document.createElement('small'); problem.textContent = `问题：${item.problem}`;
+      const fix = document.createElement('small'); fix.textContent = `替代：${item.fix}`;
+      card.append(title, problem, fix);
+      warn.appendChild(card);
+    });
+  }
+}
+
+function renderTools() {
+  renderToolControls();
+  const c=$('toolContainer'); c.replaceChildren();
+  const visible=getVisibleTools();
+  const total=tools.reduce((sum,cat)=>sum+cat.items.length,0);
+  const shown=visible.reduce((sum,cat)=>sum+cat.items.length,0);
+  if($('toolStats')) $('toolStats').textContent=`共 ${tools.length} 类、${total} 个论文工具；当前显示 ${shown} 个。`;
+  if(!visible.length){const p=document.createElement('p');p.className='muted';p.textContent='没有匹配的工具，换个关键词试试。';c.appendChild(p);return;}
+  visible.forEach(cat=>{
+    const title=document.createElement('div'); title.className='section-title'; title.textContent=`${cat.cat}（${cat.items.length}款）`; c.appendChild(title);
+    cat.items.forEach(t=>{
+      const card=document.createElement('div'); card.className='tool-card';
+      const a=document.createElement('a'); a.href=t.url; a.target='_blank'; a.rel='noopener noreferrer'; a.append(highlightText(t.name)); card.appendChild(a);
+      if(t.desc){const small=document.createElement('small'); small.append(highlightText(t.desc)); card.appendChild(small);}
+      if(Array.isArray(t.tags)){const tags=document.createElement('div'); t.tags.slice(0,4).forEach(tag=>{const s=document.createElement('span');s.className='tag';s.append(highlightText(tag));tags.appendChild(s);}); card.appendChild(tags);}
+      c.appendChild(card);
+    });
+  });
+}
+function renderAcc() { const c=$('acceleratorContainer'); c.replaceChildren(); accelerators.forEach(a=>{ const card=document.createElement('div'); card.className='tool-card'; const link=document.createElement('a'); link.href=a.url; link.target='_blank'; link.rel='noopener noreferrer'; link.textContent=a.name; card.appendChild(link); if(a.desc){const small=document.createElement('small'); small.textContent=a.desc; card.appendChild(small);} c.appendChild(card); }); }
+
+function loadData() { renderCitations(); renderHistory(); }
+function bind() { if($('fpsMode')) $('fpsMode').onchange=(e)=>applyFpsMode(e.target.value); $('searchBtn').onclick=doSearch; $('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();}); $('refInfo').oninput=updateRefPreview; $('refFormat').onchange=updateRefPreview; $('copyPromptBtn').onclick=copyRefPrompt; $('openAiBtn').onclick=copyAndOpenAI; $('doiBtn').onclick=autoFillDOI; $('generateBtn').onclick=generateAPA; $('addAutoBtn').onclick=addAuto; $('copyAllBtn').onclick=copyAll; $('clearAllBtn').onclick=clearAll; $('addAuthorBtn').onclick=addAuthor; $('loginActionBtn').onclick=handleLogin; $('toggleModeBtn').onclick=()=>{state.isLogin=!state.isLogin;updateLoginUI();}; $('closeLoginBtn').onclick=closeLogin; $('loadAdminBtn').onclick=loadAdmin; if($('toolSearch')) $('toolSearch').oninput=renderTools; if($('toolCategoryFilter')) $('toolCategoryFilter').onchange=renderTools; if($('resetToolFilterBtn')) $('resetToolFilterBtn').onclick=()=>{$('toolSearch').value='';$('toolCategoryFilter').value='all';renderTools();}; if($('academicSearchInput')) $('academicSearchInput').oninput=renderAcademicSearchSites; if($('academicTierFilter')) $('academicTierFilter').onchange=renderAcademicSearchSites; if($('resetAcademicFilterBtn')) $('resetAcademicFilterBtn').onclick=()=>{$('academicSearchInput').value='';$('academicTierFilter').value='all';renderAcademicSearchSites();}; $('clearFwBtn').onclick=()=>{state.firewallLogs=[];updateUI();renderFW();toast('已清空本地显示')}; $('closeFwBtn').onclick=()=>$('fwModal').classList.remove('active'); document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab)); }
+
+initStars(); initFpsControl(); renderEngines(); renderTools(); renderAcc(); updateUI(); loadData(); bind(); fetchToolCatalog(); fetchFW(); setInterval(fetchFW, 15000);
+</script>
+</body>
+</html>
